@@ -158,7 +158,14 @@ func (self *Station) Stats() []StatsSet{
             if (ts > module.LastData && module.LastData > 0) || ts == latestTimestamp {
               periodData := data[strconv.FormatInt(int64(ts),10)].([]interface{})
               for i, measure := range module.Measures{
-                sset.AddStat(measure, float64(ts), periodData[i].(float64))
+                if periodData[i] != nil {
+                  sset.AddStat(measure, float64(ts), periodData[i].(float64))
+                } else {
+                  log.WithFields(log.Fields{
+                    "Module": modName,
+                    "Timestamp": ts,
+                  }).Warning("Recieved datapoint with nil value")
+                }
               }
 
               log.WithFields(log.Fields{
