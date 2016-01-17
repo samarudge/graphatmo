@@ -67,28 +67,30 @@ func main() {
       os.Exit(1)
     }
 
-    stationList, err := models.FetchStations(a)
+    stns := models.StationList{Api:a}
 
     //Main app loop
     for {
+      err := stns.FetchStations()
       if err != nil {
-        log.Error(fmt.Sprintf("Error getting stations: %v", err))
-        os.Exit(1)
+        log.WithFields(log.Fields{
+          "error": err,
+        }).Error("Error getting stations")
       }
 
       metrics := []models.StatsSet{}
 
-      for i := range stationList.Stations{
-        station := &stationList.Stations[i]
+      for i := range stns.Stations{
+        station := stns.Stations[i]
         stationStats := station.Stats()
         metrics = append(metrics, stationStats...)
       }
 
       g.SendMetrics(metrics)
 
-      waitTime := stationList.NextData().Sub(time.Now())
+      waitTime := stns.NextData().Sub(time.Now())
       log.WithFields(log.Fields{
-        "NextUpdate": stationList.NextData().Format("2006-01-02 15:04:05"),
+        "NextUpdate": stns.NextData().Format("2006-01-02 15:04:05"),
       }).Info("Waiting for next update")
       time.Sleep(waitTime)
     }

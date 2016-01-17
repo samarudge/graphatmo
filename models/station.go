@@ -13,7 +13,8 @@ import(
 
 type StationList struct {
   Api           api.Api
-  Stations      []Station
+  Stations      []*Station
+  LastUpdate    time.Time
 }
 
 type Station struct {
@@ -25,47 +26,63 @@ type Station struct {
   StationList   *StationList
 }
 
-func FetchStations(a api.Api) (StationList, error){
+func (self *StationList) FetchStations() error{
   // Fetch stations and modules from Netatmo
-  stns := StationList{Api:a}
-
-  r := api.Request{Path:"getstationsdata"}
-  err := a.DoCall(&r)
-  if err != nil{
-    return stns, err
-  }
-
-  // I don't know if this kind of multi-line thing is ok but
-  //   it makes my brain hurt less when dealing with JSON
-  stationResponse := r.Data["body"].
-              (map[string]interface{})["devices"].
-              ([]interface{})
-  for _, stationJson := range stationResponse {
-    stationObj := stationJson.(map[string]interface{})
-    stn := Station{}
-
-    stn.Name = stationObj["station_name"].(string)
-    stn.Id = stationObj["_id"].(string)
-    stn.WifiStatus = stationObj["wifi_status"].(float64)
-    stn.LastStatus = stationObj["last_status_store"].(float64)
-
-    // Station is also a module
-    stn.Modules = append(stn.Modules, ModuleFromJson(stationObj))
-
-    moduleResponse := stationObj["modules"].([]interface{})
-    for _, moduleJson := range moduleResponse {
-      moduleObj := moduleJson.(map[string]interface{})
-
-      stn.Modules = append(stn.Modules, ModuleFromJson(moduleObj))
+  if self.LastUpdate.Before(time.Now().Add(time.Duration(time.Minute*-30))) {
+    r := api.Request{Path:"getstationsdata"}
+    err := self.Api.DoCall(&r)
+    if err != nil{
+      return err
     }
 
-    stn.StationList = &stns
+    // I don't know if this kind of multi-line thing is ok but
+    //   it makes my brain hurt less when dealing with JSON
+    stationResponse := r.Data["body"].
+                (map[string]interface{})["devices"].
+                ([]interface{})
 
-    log.Debug(fmt.Sprintf("Found station %s with %d modules", stn.Name, len(stn.Modules)))
-    stns.Stations = append(stns.Stations, stn)
+    for _, stationJson := range stationResponse {
+      stationObj := stationJson.(map[string]interface{})
+      stnId := stationObj["_id"].(string)
+
+      stn := &Station{}
+      for i := range self.Stations{
+        s := self.Stations[i]
+        if s.Id == stnId {
+          stn = s
+        }
+      }
+
+      if stn.Id == "" {
+        stn := Station{}
+        stn.Name = stationObj["station_name"].(string)
+        stn.Id = stationObj["_id"].(string)
+        self.Stations = append(self.Stations, &stn)
+        stn.StationList = self
+
+        // Station is also a module
+        stn.Modules = append(stn.Modules, ModuleFromJson(stationObj))
+        moduleResponse := stationObj["modules"].([]interface{})
+        for _, moduleJson := range moduleResponse {
+          moduleObj := moduleJson.(map[string]interface{})
+
+          stn.Modules = append(stn.Modules, ModuleFromJson(moduleObj))
+        }
+
+        log.WithFields(log.Fields{
+          "StationName": stn.Name,
+          "ModuleCount": len(stn.Modules),
+        }).Debug("Found new station")
+      }
+
+      stn.WifiStatus = stationObj["wifi_status"].(float64)
+      stn.LastStatus = stationObj["last_status_store"].(float64)
+    }
+
+    self.LastUpdate = time.Now()
   }
 
-  return stns, nil
+  return nil
 }
 
 func (self *StationList) NextData() time.Time{
