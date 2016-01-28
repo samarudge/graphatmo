@@ -8,22 +8,35 @@ import(
   "strings"
   "strconv"
   "time"
+  "fmt"
 )
 
 type Graphite struct{
   Connection  *grp.Graphite
 }
 
+func splitHost(hostString string) (string, int){
+  hostParts := strings.Split(hostString, ":")
+  hostPort, err := strconv.Atoi(hostParts[1])
+  if err != nil{
+    panic(fmt.Sprintf("Unable to parse Graphite host string", hostString))
+  }
+
+  return hostParts[0], hostPort
+}
+
+func CreateTest() Graphite{
+  g := Graphite{}
+  g.Connection = grp.NewGraphiteNop("",0)
+  return g
+}
+
 func Create(config config.Config) (Graphite, error){
   g := Graphite{}
 
-  hostParts := strings.Split(config.Graphite, ":")
-  hostPort, err := strconv.Atoi(hostParts[1])
-  if err != nil{
-    return g, err
-  }
+  hostname, port := splitHost(config.Graphite)
 
-  conn, err := grp.NewGraphite(hostParts[0], hostPort)
+  conn, err := grp.NewGraphite(hostname, port)
   if err != nil{
     return g, err
   }
@@ -63,9 +76,12 @@ func (self *Graphite) SendMetrics(metrics []models.StatsSet) error{
     }
   }
 
-  err = self.Connection.Disconnect()
-  if err != nil{
-    return err
+  if ! self.Connection.IsNop() {
+    err = self.Connection.Disconnect()
+    if err != nil{
+      return err
+    }
   }
+
   return nil
 }

@@ -18,6 +18,7 @@ type options struct {
   Verbose   bool            `goptions:"-v, --verbose, description='Log verbosely'"`
   Help      goptions.Help   `goptions:"-h, --help, description='Show help'"`
   Config    string          `goptions:"-c, --config, description='Config Yaml file to use'"`
+  NoSend    bool            `goptions:"-n, --no-send, description='Fetch data from Netatmo but don\\'t send to Graphite'"`
   Verb      goptions.Verbs
   Login     struct{}        `goptions:"login"`
   Run       struct{
@@ -61,10 +62,16 @@ func main() {
   if parsedOptions.Verb == "login" {
     a.DoLogin()
   } else if parsedOptions.Verb == "" || parsedOptions.Verb == "run" {
-    g, err := graphite.Create(config)
-    if err != nil{
-      log.Error(fmt.Sprintf("Error connecting to Graphite: %v", err))
-      os.Exit(1)
+    g := graphite.Graphite{}
+    if parsedOptions.NoSend {
+      g = graphite.CreateTest()
+    } else {
+      g, err = graphite.Create(config)
+
+      if err != nil{
+        log.Error(fmt.Sprintf("Error connecting to Graphite: %v", err))
+        os.Exit(1)
+      }
     }
 
     stns := models.StationList{Api:a}
