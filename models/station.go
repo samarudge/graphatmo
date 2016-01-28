@@ -3,12 +3,7 @@ package models
 import(
   "../api"
   log "github.com/Sirupsen/logrus"
-  "fmt"
-  "net/url"
-  "strings"
   "time"
-  "strconv"
-  "sort"
 )
 
 type StationList struct {
@@ -61,12 +56,17 @@ func (self *StationList) FetchStations() error{
         stn.StationList = self
 
         // Station is also a module
-        stn.Modules = append(stn.Modules, ModuleFromJson(stationObj))
+        mod := ModuleFromJson(stationObj)
+        mod.Station = &stn
+        stn.Modules = append(stn.Modules, mod)
+
         moduleResponse := stationObj["modules"].([]interface{})
         for _, moduleJson := range moduleResponse {
           moduleObj := moduleJson.(map[string]interface{})
 
-          stn.Modules = append(stn.Modules, ModuleFromJson(moduleObj))
+          mod := ModuleFromJson(moduleObj)
+          mod.Station = &stn
+          stn.Modules = append(stn.Modules, mod)
         }
 
         log.WithFields(log.Fields{
@@ -118,88 +118,7 @@ func (self *Station) Stats() []StatsSet{
   for i := range self.Modules{
     module := &self.Modules[i]
 
-    if module.NextData().Before(time.Now()) {
-      sset := NewStatsSet("meta", "module", self.Name, module.Name)
-      sset.AddStat("battery", self.LastStatus, module.Battery)
-      sset.AddStat("rf", self.LastStatus, module.RfStrength)
-      stats = append(stats, sset)
-
-      dataFrom := time.Now().Add(time.Duration(3600*-1)*time.Second)
-
-      // Now the stations actual metrics
-      p := url.Values{}
-      p.Set("device_id", self.Id)
-      p.Set("module_id", module.Id)
-      p.Set("scale", "max")
-      p.Set("type", strings.Join(module.Measures, ","))
-      p.Set("real_time", "true")
-      p.Set("optimize", "false")
-      p.Set("date_begin", strconv.FormatInt(dataFrom.Unix(),10))
-      p.Set("date_end", strconv.FormatInt(time.Now().Unix(),10))
-      r := api.Request{
-        Path:"getmeasure",
-        Params:p,
-      }
-      err := self.StationList.Api.DoCall(&r)
-      if err != nil{
-        log.Error(fmt.Sprintf("Error getting stats for %s/%s: %s", self.Name, module.Name, err))
-      } else {
-        //Measurements
-        data := r.Data["body"].
-                (map[string]interface{})
-
-        timestamps := []int{}
-
-        for ts := range data{
-          t,_ := strconv.Atoi(ts)
-          timestamps = append(timestamps, int(t))
-        }
-        sort.Ints(timestamps)
-
-        latestTimestamp := timestamps[len(timestamps)-1]
-
-        modName := fmt.Sprintf("%s/%s", self.Name, module.Name)
-
-        logFields := log.Fields{
-          "DataInterval": module.DataInterval,
-          "LastData": time.Unix(int64(module.LastData), 10).Format("2006-01-02 15:04:05"),
-          "LatestData": time.Unix(int64(latestTimestamp), 10).Format("2006-01-02 15:04:05"),
-          "Module": modName,
-        }
-
-        if module.LastData >= latestTimestamp {
-          log.WithFields(logFields).Warning("Update due but no new data!")
-        } else {
-          sset := NewStatsSet("station", self.Name, module.Name)
-          for _,ts := range timestamps{
-            if (ts > module.LastData && module.LastData > 0) || ts == latestTimestamp {
-              periodData := data[strconv.FormatInt(int64(ts),10)].([]interface{})
-              for i, measure := range module.Measures{
-                if periodData[i] != nil {
-                  sset.AddStat(measure, float64(ts), periodData[i].(float64))
-                } else {
-                  log.WithFields(log.Fields{
-                    "Module": modName,
-                    "Timestamp": ts,
-                  }).Warning("Recieved datapoint with nil value")
-                }
-              }
-
-              log.WithFields(log.Fields{
-                "Module": modName,
-                "Time": time.Unix(int64(ts), 10).Format("2006-01-02 15:04:05"),
-              }).Debug("Sending Data")
-            }
-          }
-
-          stats = append(stats, sset)
-
-          module.LastData = latestTimestamp
-          module.DataInterval = latestTimestamp-timestamps[len(timestamps)-2]
-          log.WithFields(logFields).Info("Updated")
-        }
-      }
-    }
+    stats = append(stats, module.Stats()...)
   }
 
   return stats
