@@ -135,7 +135,6 @@ func (self *Module) TimeSeriesData(data map[string]interface{}) DataPointList{
       if periodData == nil {
         datapoint.Complete = false
       } else {
-        fmt.Println(periodData, measure)
         datapoint.Data[measure] = periodData.(float64)
       }
     }
@@ -151,8 +150,8 @@ func (self *Module) TimeSeriesData(data map[string]interface{}) DataPointList{
 func (self *Module) TimestampStats(sset *StatsSet, datapoints DataPointList){
   for _,point := range datapoints.DataPoints{
     if point.Time.Unix > self.LastData.Unix {
-      for _,measure := range self.Measures{
-        sset.AddStat(measure, point.Time.Float, point.Data[measure])
+      for name,value := range point.Data{
+        sset.AddStat(name, point.Time.Float, value)
       }
 
       log.WithFields(log.Fields{
