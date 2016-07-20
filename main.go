@@ -7,11 +7,9 @@ import(
   "path/filepath"
   "os/user"
   "os"
-  "time"
   "github.com/yosmudge/graphatmo/config"
   "github.com/yosmudge/graphatmo/api"
-  "github.com/yosmudge/graphatmo/models"
-  "github.com/yosmudge/graphatmo/graphite"
+  "github.com/yosmudge/graphatmo/updater"
 )
 
 type options struct {
@@ -57,57 +55,11 @@ func main() {
 
   config := config.ParseConfig(fullConfigPath)
 
-  a, err := api.Create(config)
-  if err != nil{
-    log.WithFields(log.Fields{
-      "error": err,
-    }).Error("Error connecting to Netatmo")
-    os.Exit(1)
-  }
-
   if parsedOptions.Verb == "login" {
+    a, _ := api.Create(config)
     a.DoLogin()
   } else if parsedOptions.Verb == "" || parsedOptions.Verb == "run" {
-    g := graphite.Graphite{}
-    if parsedOptions.NoSend {
-      g = graphite.CreateTest()
-    } else {
-      g, err = graphite.Create(config)
-
-      if err != nil{
-        log.WithFields(log.Fields{
-          "error": err,
-        }).Error("Error connecting to Graphite")
-        os.Exit(1)
-      }
-    }
-
-    stns := models.StationList{Api:a}
-
-    //Main app loop
-    for {
-      err := stns.FetchStations()
-      if err != nil {
-        log.WithFields(log.Fields{
-          "error": err,
-        }).Error("Error getting stations")
-      }
-
-      metrics := []models.StatsSet{}
-
-      for i := range stns.Stations{
-        station := stns.Stations[i]
-        stationStats := station.Stats()
-        metrics = append(metrics, stationStats...)
-      }
-
-      g.SendMetrics(metrics)
-
-      waitTime := stns.NextData().Sub(time.Now())
-      log.WithFields(log.Fields{
-        "NextUpdate": stns.NextData().Format("2006-01-02 15:04:05"),
-      }).Info("Waiting for next update")
-      time.Sleep(waitTime)
-    }
+    u := updater.New(&config, parsedOptions.NoSend)
+    u.Run()
   }
 }
