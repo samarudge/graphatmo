@@ -1,0 +1,8 @@
+package: github.com/yosmudge/graphatmo
+import:
+- package: github.com/Sirupsen/logrus
+- package: github.com/go-yaml/yaml
+- package: github.com/howeyc/gopass
+- package: github.com/marpaia/graphite-golang
+- package: github.com/segmentio/go-prompt
+- package: github.com/voxelbrain/goptions

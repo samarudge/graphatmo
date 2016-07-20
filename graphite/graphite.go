@@ -3,8 +3,8 @@ package graphite
 import(
   grp "github.com/marpaia/graphite-golang"
   log "github.com/Sirupsen/logrus"
-  "../models"
-  "../config"
+  "github.com/yosmudge/graphatmo/models"
+  "github.com/yosmudge/graphatmo/config"
   "strings"
   "strconv"
   "time"

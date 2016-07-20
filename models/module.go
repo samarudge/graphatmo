@@ -1,7 +1,7 @@
 package models
 
 import(
-  "../api"
+  "github.com/yosmudge/graphatmo/api"
   log "github.com/Sirupsen/logrus"
   "time"
   "net/url"

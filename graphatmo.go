@@ -8,10 +8,10 @@ import(
   "os/user"
   "os"
   "time"
-  "./config"
-  "./api"
-  "./models"
-  "./graphite"
+  "github.com/yosmudge/graphatmo/config"
+  "github.com/yosmudge/graphatmo/api"
+  "github.com/yosmudge/graphatmo/models"
+  "github.com/yosmudge/graphatmo/graphite"
 )
 
 type options struct {

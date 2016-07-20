@@ -3,7 +3,7 @@ package api
 import(
   "os"
   "fmt"
-  "../config"
+  "github.com/yosmudge/graphatmo/config"
   log "github.com/Sirupsen/logrus"
   "golang.org/x/oauth2"
   "github.com/segmentio/go-prompt"
