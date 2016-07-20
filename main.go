@@ -44,10 +44,14 @@ func main() {
   log.Debug("Logging verbosely!")
 
   fullConfigPath, _ := filepath.Abs(parsedOptions.Config)
-  log.Debug(fmt.Sprintf("Loading config file %s", fullConfigPath))
+  log.WithFields(log.Fields{
+    "configFile": fullConfigPath,
+  }).Debug("Loading config file")
 
   if _, err := os.Stat(fullConfigPath); os.IsNotExist(err) {
-    log.Error(fmt.Sprintf("Config file %s does not exist!",fullConfigPath))
+    log.WithFields(log.Fields{
+      "configFile": fullConfigPath,
+    }).Error("Config file does not exist")
     os.Exit(1)
   }
 
@@ -55,7 +59,9 @@ func main() {
 
   a, err := api.Create(config)
   if err != nil{
-    log.Error(fmt.Sprintf("Error connecting to Netatmo: %v", err))
+    log.WithFields(log.Fields{
+      "error": err,
+    }).Error("Error connecting to Netatmo")
     os.Exit(1)
   }
 
@@ -69,7 +75,9 @@ func main() {
       g, err = graphite.Create(config)
 
       if err != nil{
-        log.Error(fmt.Sprintf("Error connecting to Graphite: %v", err))
+        log.WithFields(log.Fields{
+          "error": err,
+        }).Error("Error connecting to Graphite")
         os.Exit(1)
       }
     }
