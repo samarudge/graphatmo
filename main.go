@@ -1,14 +1,15 @@
 package main
 
 import(
+  "os"
+  "fmt"
+  "os/user"
+  "path/filepath"
   "github.com/voxelbrain/goptions"
   log "github.com/Sirupsen/logrus"
-  "fmt"
-  "path/filepath"
-  "os/user"
-  "os"
+
   "github.com/yosmudge/graphatmo/config"
-  "github.com/yosmudge/graphatmo/api"
+  "github.com/yosmudge/graphatmo/netatmo"
   "github.com/yosmudge/graphatmo/updater"
 )
 
@@ -56,7 +57,7 @@ func main() {
   config := config.ParseConfig(fullConfigPath)
 
   if parsedOptions.Verb == "login" {
-    a, _ := api.Create(config)
+    a, _ := netatmo.Create(config)
     a.DoLogin()
   } else if parsedOptions.Verb == "" || parsedOptions.Verb == "run" {
     u := updater.New(&config, parsedOptions.NoSend)

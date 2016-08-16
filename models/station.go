@@ -1,13 +1,13 @@
 package models
 
 import(
-  "github.com/yosmudge/graphatmo/api"
+  "github.com/yosmudge/graphatmo/netatmo"
   log "github.com/Sirupsen/logrus"
   "time"
 )
 
 type StationList struct {
-  Api           api.Api
+  Api           netatmo.Api
   Stations      []*Station
   LastUpdate    time.Time
 }
@@ -24,7 +24,7 @@ type Station struct {
 func (self *StationList) FetchStations() error{
   // Fetch stations and modules from Netatmo
   if self.LastUpdate.Before(time.Now().Add(time.Duration(time.Minute*-30))) {
-    r := api.Request{Path:"getstationsdata"}
+    r := netatmo.Request{Path:"getstationsdata"}
     err := self.Api.DoCall(&r)
     if err != nil{
       return err

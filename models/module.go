@@ -1,7 +1,7 @@
 package models
 
 import(
-  "github.com/yosmudge/graphatmo/api"
+  "github.com/yosmudge/graphatmo/netatmo"
   log "github.com/Sirupsen/logrus"
   "time"
   "net/url"
@@ -75,7 +75,7 @@ func (self *Module) Stats() []StatsSet{
     p.Set("optimize", "false")
     p.Set("date_begin", strconv.FormatInt(dataFrom.Unix(),10))
     p.Set("date_end", strconv.FormatInt(time.Now().Unix(),10))
-    r := api.Request{
+    r := netatmo.Request{
       Path:"getmeasure",
       Params:p,
     }
