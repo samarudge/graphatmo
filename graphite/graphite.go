@@ -25,29 +25,29 @@ func splitHost(hostString string) (string, int){
   return hostParts[0], hostPort
 }
 
-func CreateTest() Graphite{
+func CreateTest() *Graphite{
   g := Graphite{}
   g.Connection = grp.NewGraphiteNop("",0)
-  return g
+  return &g
 }
 
-func Create(config config.Config) (Graphite, error){
+func Create(config config.Config) (*Graphite, error){
   g := Graphite{}
 
   hostname, port := splitHost(config.Graphite)
 
   conn, err := grp.NewGraphite(hostname, port)
   if err != nil{
-    return g, err
+    return &g, err
   }
 
   g.Connection = conn
   err = g.Connection.Disconnect()
   if err != nil{
-    return g, err
+    return &g, err
   }
 
-  return g, nil
+  return &g, nil
 }
 
 func (self *Graphite) SendMetrics(metrics []models.StatsSet) error{
