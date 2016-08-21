@@ -22,7 +22,7 @@ script:
   - ${GOPATH}/bin/staticcheck $(go list ./... | grep -v "vendor")
   - out=$(${GOPATH}/bin/golint $(go list ./... | grep -v "vendor"))
   - if [ "$out" ]; then echo "$out"; exit 1; fi
-  - gosimple $(go list ./... | grep -v "vendor")
+  - ${GOPATH}/bin/gosimple $(go list ./... | grep -v "vendor")
   - go build
 
 env:
