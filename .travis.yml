@@ -17,12 +17,12 @@ allow_failures:
   - go: tip
 
 script:
-  - gofmt -l $(${GOPATH}/bin/glide novendor)
-  - go vet $(${GOPATH}/bin/glide novendor)
+  - gofmt -l $(go list ./... | grep -v "vendor")
+  - go vet $(go list ./... | grep -v "vendor")
   - ${GOPATH}/bin/staticcheck $(go list ./... | grep -v "vendor")
-  - out=$(${GOPATH}/bin/golint $(${GOPATH}/bin/glide novendor))
+  - out=$(${GOPATH}/bin/golint $(go list ./... | grep -v "vendor")
   - if [ "$out" ]; then echo "$out"; exit 1; fi
-  - gosimple $(${GOPATH}/bin/glide novendor))
+  - gosimple $(go list ./... | grep -v "vendor")
   - go build
 
 env:
