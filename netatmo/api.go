@@ -42,7 +42,7 @@ func Create(config config.Config) (Api,error){
 
   // create a rate limiter, 5 second limit, 10 request burst, 5 request preload
   a.Limiter = make(chan time.Time, 10)
-  for _,_ = range [5]bool{}{
+  for range [5]bool{}{
     a.Limiter <- time.Now()
   }
   ticker := time.NewTicker(time.Second*5)

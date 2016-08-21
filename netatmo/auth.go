@@ -40,9 +40,5 @@ func (self *Api) LoadToken() (oauth2.Token, error){
 
   token = oauth2.Token{}
   err = yaml.Unmarshal(authContent, &token)
-  if err != nil {
-    return token, err
-  }
-
-  return token, nil
+  return token, err
 }
