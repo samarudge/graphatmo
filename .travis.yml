@@ -7,14 +7,22 @@ go:
   - tip
 
 install:
-  - go get github.com/Masterminds/glide
-  - ${GOPATH}/bin/glide -v
+  - go get -u github.com/Masterminds/glide
+  - go get -u honnef.co/go/staticcheck/cmd/staticcheck
+  - go get -u github.com/golang/lint/golint
+  - go get -u honnef.co/go/simple/cmd/gosimple
   - ${GOPATH}/bin/glide install
 
 allow_failures:
   - go: tip
 
 script:
+  - gofmt -l $(${GOPATH}/bin/glide novendor)
+  - go vet $(${GOPATH}/bin/glide novendor)
+  - ${GOPATH}/bin/staticcheck $(go list ./... | grep -v "vendor")
+  - out=$(${GOPATH}/bin/golint $(${GOPATH}/bin/glide novendor))
+  - if [ "$out" ]; then echo "$out"; exit 1; fi
+  - gosimple $(${GOPATH}/bin/glide novendor))
   - go build
 
 env:
