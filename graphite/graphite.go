@@ -3,7 +3,7 @@ package graphite
 import(
   grp "github.com/marpaia/graphite-golang"
   log "github.com/Sirupsen/logrus"
-  "github.com/yosmudge/graphatmo/models"
+  "github.com/yosmudge/graphatmo/netatmo"
   "github.com/yosmudge/graphatmo/config"
   "strings"
   "strconv"
@@ -50,7 +50,7 @@ func Create(config config.Config) (*Graphite, error){
   return &g, nil
 }
 
-func (self *Graphite) SendMetrics(metrics []models.StatsSet) error{
+func (self *Graphite) SendMetrics(metrics []netatmo.StatsSet) error{
   err := self.Connection.Connect()
   if err != nil{
     return err

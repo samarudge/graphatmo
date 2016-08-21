@@ -2,6 +2,7 @@ package netatmo
 
 import(
   "fmt"
+  "time"
   "os/user"
   "net/http"
   "golang.org/x/oauth2"
@@ -16,6 +17,7 @@ type Api struct {
   Endpoint        oauth2.Endpoint
   Config          oauth2.Config
   Client          *http.Client
+  Limiter         chan time.Time
 }
 
 func Create(config config.Config) (Api,error){
@@ -37,6 +39,21 @@ func Create(config config.Config) (Api,error){
     Scopes:       []string{"read_station"},
     Endpoint:     a.Endpoint,
   }
+
+  // create a rate limiter, 5 second limit, 10 request burst, 5 request preload
+  a.Limiter = make(chan time.Time, 10)
+  for _,_ = range [5]bool{}{
+    a.Limiter <- time.Now()
+  }
+  ticker := time.NewTicker(time.Second*5)
+  go func(){
+    for tick := range ticker.C{
+      select{
+        case a.Limiter <- tick:
+        default:
+      }
+    }
+  }()
 
   return a, nil
 }

@@ -14,6 +14,7 @@ type Updater struct{
   Api         netatmo.Api
   NoSend      bool
   Graphite    *graphite.Graphite
+  Stations    []netatmo.Station
 }
 
 func New(c *config.Config, noSend bool) *Updater{

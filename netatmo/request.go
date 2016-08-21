@@ -17,7 +17,8 @@ type Request struct {
   Data            map[string]interface{}
 }
 
-func (self *Api) DoCall(request *Request) error {
+func (self *Api) DoCall(request *Request, response interface{}) error {
+  <-self.Limiter
   // Call netatmo API
   // Only implements "GET" at the moment because that's all we need
   if request.Method == "" {
@@ -57,6 +58,11 @@ func (self *Api) DoCall(request *Request) error {
 
     if resp.StatusCode == 200 {
       if err := json.Unmarshal(responseRaw, &request.Data); err != nil {
+        baseLogFields["err"] = err
+        log.WithFields(baseLogFields).Error("Error making call")
+        return fmt.Errorf("Could not unmarshal JSON: %s", err)
+      }
+      if err := json.Unmarshal(responseRaw, response); err != nil {
         baseLogFields["err"] = err
         log.WithFields(baseLogFields).Error("Error making call")
         return fmt.Errorf("Could not unmarshal JSON: %s", err)
