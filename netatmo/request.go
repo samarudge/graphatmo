@@ -70,7 +70,7 @@ func (self *Api) DoCall(request *Request, response interface{}) error {
     } else {
       baseLogFields["err"] = err
       log.WithFields(baseLogFields).Error("Error making call")
-      return fmt.Errorf("Error with %s call: %s %s", request.Path, resp.StatusCode, responseRaw)
+      return fmt.Errorf("Error with %s call: %d %s", request.Path, resp.StatusCode, responseRaw)
     }
   default:
     panic(fmt.Sprintf("Called DoCall with unknown method %s", request.Method))

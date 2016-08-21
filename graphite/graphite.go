@@ -19,7 +19,7 @@ func splitHost(hostString string) (string, int){
   hostParts := strings.Split(hostString, ":")
   hostPort, err := strconv.Atoi(hostParts[1])
   if err != nil{
-    panic(fmt.Sprintf("Unable to parse Graphite host string", hostString))
+    panic(fmt.Sprintf("Unable to parse Graphite host string: %s", hostString))
   }
 
   return hostParts[0], hostPort
