@@ -1,0 +1,20 @@
+language: go
+
+go:
+  - 1.5
+  - 1.6
+  - 1.7
+  - tip
+
+install:
+  go get github.com/Masterminds/glide
+  ${GOPATH}/bin/glide install
+
+allow_failures:
+  - go: tip
+
+script:
+  - go build
+
+env:
+  - "GO15VENDOREXPERIMENT=1"
