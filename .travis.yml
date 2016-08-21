@@ -7,9 +7,9 @@ go:
   - tip
 
 install:
-  go get github.com/Masterminds/glide
-  ${GOPATH}/bin/glide -v
-  ${GOPATH}/bin/glide install
+  - go get github.com/Masterminds/glide
+  - ${GOPATH}/bin/glide -v
+  - ${GOPATH}/bin/glide install
 
 allow_failures:
   - go: tip
