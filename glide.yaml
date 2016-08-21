@@ -6,3 +6,6 @@ import:
 - package: github.com/marpaia/graphite-golang
 - package: github.com/segmentio/go-prompt
 - package: github.com/voxelbrain/goptions
+- package: golang.org/x/net
+  subpackages:
+    - context

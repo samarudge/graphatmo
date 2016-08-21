@@ -1,0 +1,46 @@
+hash: 1dc87e623a05c3372cda884243311a9854f6b55cb8741d65ac428cef4dd003bb
+updated: 2016-08-21T14:19:44.241909073+01:00
+imports:
+- name: github.com/go-yaml/yaml
+  version: e4d366fc3c7938e2958e662b4258c7a89e1f0e3e
+- name: github.com/golang/protobuf
+  version: f592bd283e9ef86337a432eb50e592278c3d534d
+  subpackages:
+  - proto
+- name: github.com/howeyc/gopass
+  version: b63a7d07e65df376d14e2d72907a93d4847dffe4
+- name: github.com/marpaia/graphite-golang
+  version: bea0c295debd84f9c80050cea3c6aeb3dd448f7c
+- name: github.com/segmentio/go-prompt
+  version: f3218e418a3d6dbe1dcab5809d80fa6e15c05cb4
+- name: github.com/Sirupsen/logrus
+  version: 08a8a7c27e3d058a8989316a850daad1c10bf4ab
+- name: github.com/voxelbrain/goptions
+  version: 26cb8b04692384f4dc269de3b5fcf3e2ef78573e
+- name: golang.org/x/crypto
+  version: b3cc7317554b3e708b116d997899e612bab100d6
+  subpackages:
+  - ssh/terminal
+- name: golang.org/x/net
+  version: 7394c112eae4dba7e96bfcfe738e6373d61772b4
+  subpackages:
+  - context
+- name: golang.org/x/oauth2
+  version: 3b966c7f301c0c71c53d94dc632a62df0a682cd7
+  subpackages:
+  - internal
+- name: golang.org/x/sys
+  version: a646d33e2ee3172a661fc09bca23bb4889a41bc8
+  subpackages:
+  - unix
+- name: google.golang.org/appengine
+  version: e951d3868b377b14f4e60efa3a301532ee3c1ebf
+  subpackages:
+  - internal
+  - internal/base
+  - internal/datastore
+  - internal/log
+  - internal/remote_api
+  - internal/urlfetch
+  - urlfetch
+testImports: []
