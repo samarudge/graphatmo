@@ -8,9 +8,9 @@ import(
   "github.com/voxelbrain/goptions"
   log "github.com/Sirupsen/logrus"
 
-  "github.com/yosmudge/graphatmo/config"
-  "github.com/yosmudge/graphatmo/netatmo"
-  "github.com/yosmudge/graphatmo/updater"
+  "github.com/YoSmudge/graphatmo/config"
+  "github.com/YoSmudge/graphatmo/netatmo"
+  "github.com/YoSmudge/graphatmo/updater"
 )
 
 type options struct {

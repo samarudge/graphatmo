@@ -4,7 +4,7 @@ import(
   "time"
   log "github.com/Sirupsen/logrus"
 
-  "github.com/yosmudge/graphatmo/netatmo"
+  "github.com/YoSmudge/graphatmo/netatmo"
 )
 
 func (u *Updater) Run(){

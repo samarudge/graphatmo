@@ -4,9 +4,9 @@ import(
   "os"
   log "github.com/Sirupsen/logrus"
 
-  "github.com/yosmudge/graphatmo/config"
-  "github.com/yosmudge/graphatmo/netatmo"
-  "github.com/yosmudge/graphatmo/graphite"
+  "github.com/YoSmudge/graphatmo/config"
+  "github.com/YoSmudge/graphatmo/netatmo"
+  "github.com/YoSmudge/graphatmo/graphite"
 )
 
 type Updater struct{

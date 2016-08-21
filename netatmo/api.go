@@ -7,7 +7,7 @@ import(
   "net/http"
   "golang.org/x/oauth2"
 
-  "github.com/yosmudge/graphatmo/config"
+  "github.com/YoSmudge/graphatmo/config"
 )
 
 type Api struct {

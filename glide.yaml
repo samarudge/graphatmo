@@ -1,4 +1,4 @@
-package: github.com/yosmudge/graphatmo
+package: github.com/YoSmudge/graphatmo
 import:
 - package: github.com/Sirupsen/logrus
 - package: github.com/go-yaml/yaml
