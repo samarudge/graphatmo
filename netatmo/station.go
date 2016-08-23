@@ -2,6 +2,7 @@ package netatmo
 
 import(
   "fmt"
+  "time"
   "encoding/json"
 )
 
@@ -60,7 +61,11 @@ func (a *Api) FetchStations() ([]Station, error){
   return stations, err
 }
 
-func (s *Station) Stats(statsQuery Query, a *Api) []StatsSet{
+func (s *Station) Stats(a *Api) []StatsSet{
+  return s.StatsBetween(time.Time{}, time.Time{}, a)
+}
+
+func (s *Station) StatsBetween(startTime time.Time, endTime time.Time, a *Api) []StatsSet{
   // Stats for the station
   stats := []StatsSet{}
 
@@ -72,7 +77,7 @@ func (s *Station) Stats(statsQuery Query, a *Api) []StatsSet{
   // Modules
   for i := range s.Modules{
     module := s.Modules[i]
-    stats = append(stats, module.Stats(statsQuery, a)...)
+    stats = append(stats, module.StatsBetween(startTime, endTime, a)...)
   }
 
   return stats

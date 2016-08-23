@@ -1,6 +1,9 @@
 package netatmo
 
 import(
+  "time"
+  "strconv"
+  "net/url"
   log "github.com/Sirupsen/logrus"
 )
 
@@ -15,7 +18,7 @@ type Module struct{
   Station       *Station
 }
 
-func (m *Module) Stats(statsQuery Query, a *Api) []StatsSet{
+func (m *Module) StatsBetween(startTime time.Time, endTime time.Time, a *Api) []StatsSet{
   stats := []StatsSet{}
 
   sset := NewStatsSet("meta", "module", m.Station.Name, m.Name)
@@ -23,35 +26,58 @@ func (m *Module) Stats(statsQuery Query, a *Api) []StatsSet{
   sset.AddStat("rf", m.Station.LastStatus.Float, m.RfStrength)
   stats = append(stats, sset)
 
-  q := statsQuery.BaseQuery(m.Station.Id, m.Id, m.Measures)
+  baseQuery := url.Values{}
 
-  r := Request{
-    Path:"getmeasure",
-    Params:q,
+  if !startTime.IsZero(){
+    baseQuery.Set("date_begin", strconv.FormatInt(startTime.Unix(),10))
   }
 
-  var rsp MeasureResponse
-
-  err := a.DoCall(&r, &rsp)
-  if err != nil{
-    log.WithFields(log.Fields{
-      "module": m.Name,
-      "station": m.Station.Name,
-      "error": err,
-      "query": q.Encode(),
-    }).Warning("Error getting statistics for module")
-    return stats
+  if !endTime.IsZero(){
+    baseQuery.Set("date_end", strconv.FormatInt(endTime.Unix(),10))
   }
+
+  var max int64 = 1000
+  if startTime.IsZero() && endTime.IsZero(){
+    max = 1
+  }
+
+  baseQuery.Set("limit", strconv.FormatInt(max, 10))
+
+  baseQuery.Set("device_id", m.Station.Id)
+  baseQuery.Set("module_id", m.Id)
+  baseQuery.Set("scale", "max")
+  baseQuery.Set("real_time", "true")
+  baseQuery.Set("optimize", "false")
 
   stationDataSet := NewStatsSet("station", m.Station.Name, m.Name)
 
-  for time,measures := range rsp.Body{
-    ts := Timestamp{}
-    ts.FromString(time)
+  for _,measure := range m.Measures{
+    var rsp MeasureResponse
 
-    for key,measure := range statsQuery.TargetMeasures(m.Measures){
-      val := measures[key]
-      stationDataSet.AddStat(measure, ts.Float, val)
+    q := baseQuery
+    q.Set("type", measure)
+
+    r := Request{
+      Path:"getmeasure",
+      Params:q,
+    }
+
+    err := a.DoCall(&r, &rsp)
+    if err != nil{
+      log.WithFields(log.Fields{
+        "module": m.Name,
+        "station": m.Station.Name,
+        "error": err,
+        "query": q.Encode(),
+        "measure": measure,
+      }).Warning("Error getting statistics for module")
+      return stats
+    }
+
+    for time,measures := range rsp.Body{
+      ts := Timestamp{}
+      ts.FromString(time)
+      stationDataSet.AddStat(measure, ts.Float, measures[0])
     }
   }
 

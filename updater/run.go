@@ -3,8 +3,6 @@ package updater
 import(
   "time"
   log "github.com/Sirupsen/logrus"
-
-  "github.com/YoSmudge/graphatmo/netatmo"
 )
 
 func (u *Updater) Run(){
@@ -20,8 +18,7 @@ func (u *Updater) Run(){
     }
 
     for _,s := range u.Stations{
-      sq := netatmo.Query{}
-      metrics := s.Stats(sq, &u.Api)
+      metrics := s.Stats(&u.Api)
       u.Graphite.SendMetrics(metrics)
     }
 
