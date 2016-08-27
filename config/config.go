@@ -28,6 +28,7 @@ func ParseConfig(configFile string) Config{
   err = yaml.Unmarshal(configContent, &parsedConfig)
   if err != nil {
     log.Fatalf("error: %v", err)
+    os.Exit(1)
   }
 
   return parsedConfig

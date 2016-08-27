@@ -1,0 +1,29 @@
+language: go
+
+go:
+  - 1.5
+  - 1.6
+  - 1.7
+  - tip
+
+install:
+  - go get -u github.com/Masterminds/glide
+  - go get -u honnef.co/go/staticcheck/cmd/staticcheck
+  - go get -u github.com/golang/lint/golint
+  - go get -u honnef.co/go/simple/cmd/gosimple
+  - ${GOPATH}/bin/glide install
+
+allow_failures:
+  - go: tip
+
+script:
+  - gofmt -l $(find . -path ./vendor -prune -o -name '*.go' -print)
+  - go vet $(go list ./... | grep -v "vendor")
+  - ${GOPATH}/bin/staticcheck $(go list ./... | grep -v "vendor")
+  - out=$(${GOPATH}/bin/golint $(go list ./... | grep -v "vendor"))
+  - if [ "$out" ]; then echo "$out"; exit 1; fi
+  - ${GOPATH}/bin/gosimple $(go list ./... | grep -v "vendor")
+  - go build
+
+env:
+  - "GO15VENDOREXPERIMENT=1"

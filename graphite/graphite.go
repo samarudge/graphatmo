@@ -3,8 +3,8 @@ package graphite
 import(
   grp "github.com/marpaia/graphite-golang"
   log "github.com/Sirupsen/logrus"
-  "github.com/yosmudge/graphatmo/models"
-  "github.com/yosmudge/graphatmo/config"
+  "github.com/YoSmudge/graphatmo/netatmo"
+  "github.com/YoSmudge/graphatmo/config"
   "strings"
   "strconv"
   "time"
@@ -19,38 +19,38 @@ func splitHost(hostString string) (string, int){
   hostParts := strings.Split(hostString, ":")
   hostPort, err := strconv.Atoi(hostParts[1])
   if err != nil{
-    panic(fmt.Sprintf("Unable to parse Graphite host string", hostString))
+    panic(fmt.Sprintf("Unable to parse Graphite host string: %s", hostString))
   }
 
   return hostParts[0], hostPort
 }
 
-func CreateTest() Graphite{
+func CreateTest() *Graphite{
   g := Graphite{}
   g.Connection = grp.NewGraphiteNop("",0)
-  return g
+  return &g
 }
 
-func Create(config config.Config) (Graphite, error){
+func Create(config config.Config) (*Graphite, error){
   g := Graphite{}
 
   hostname, port := splitHost(config.Graphite)
 
   conn, err := grp.NewGraphite(hostname, port)
   if err != nil{
-    return g, err
+    return &g, err
   }
 
   g.Connection = conn
   err = g.Connection.Disconnect()
   if err != nil{
-    return g, err
+    return &g, err
   }
 
-  return g, nil
+  return &g, nil
 }
 
-func (self *Graphite) SendMetrics(metrics []models.StatsSet) error{
+func (self *Graphite) SendMetrics(metrics []netatmo.StatsSet) error{
   err := self.Connection.Connect()
   if err != nil{
     return err
