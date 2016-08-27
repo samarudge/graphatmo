@@ -17,7 +17,7 @@ allow_failures:
   - go: tip
 
 script:
-  - gofmt -l $(go list ./... | grep -v "vendor")
+  - gofmt -l $(glide novendor)
   - go vet $(go list ./... | grep -v "vendor")
   - ${GOPATH}/bin/staticcheck $(go list ./... | grep -v "vendor")
   - out=$(${GOPATH}/bin/golint $(go list ./... | grep -v "vendor"))
